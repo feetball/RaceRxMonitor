@@ -17,7 +17,7 @@
         >
           <l-tile-layer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
+            attribution="© OpenStreetMap contributors"
           />
           <l-polyline
             :lat-lngs="pathCoordinates"
@@ -27,11 +27,8 @@
           <l-marker
             v-if="latestPosition"
             :lat-lng="latestPosition"
-          >
-            <l-icon>
-              <v-icon color="red" size="32">mdi-car</v-icon>
-            </l-icon>
-          </l-marker>
+            :icon="carIcon"
+          />
         </l-map>
       </v-col>
     </v-row>
@@ -53,7 +50,8 @@
 <script>
 import { ref, onMounted, onUnmounted } from 'vue'
 import mqtt from 'mqtt'
-import { LMap, LTileLayer, LMarker, LPolyline, LIcon } from 'vue3-leaflet'
+import { LMap, LTileLayer, LMarker, LPolyline } from 'vue3-leaflet'
+import L from 'leaflet'
 
 export default {
   name: 'RaceTrackView',
@@ -61,8 +59,7 @@ export default {
     LMap,
     LTileLayer,
     LMarker,
-    LPolyline,
-    LIcon
+    LPolyline
   },
 
   setup() {
@@ -74,9 +71,18 @@ export default {
     let client = null
     const MAX_POINTS = 54 // 54 seconds of data
 
+    // Define a simple custom car icon using Leaflet’s default marker or a custom image
+    const carIcon = L.icon({
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png', // Default Leaflet marker
+      iconSize: [25, 41], // Size of the icon
+      iconAnchor: [12, 41], // Point of the icon that corresponds to marker’s location
+      popupAnchor: [1, -34], // Point from which the popup should open relative to the iconAnchor
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      shadowSize: [41, 41]
+    })
+
     const connectMQTT = () => {
       client = mqtt.connect('mqtt://your-mqtt-broker-url', {
-        // Add your MQTT connection options here
         clientId: 'race_track_' + Math.random().toString(16).substr(2, 8),
         username: 'your-username', // if required
         password: 'your-password'  // if required
@@ -135,12 +141,14 @@ export default {
       connected,
       latestPosition,
       pathCoordinates,
-      center
+      center,
+      carIcon
     }
   }
 }
 </script>
 
 <style>
-/* Add any custom styles here */
+/* Ensure Leaflet styles are loaded */
+@import 'leaflet/dist/leaflet.css';
 </style>
